@@ -606,3 +606,16 @@ Index Mobile
 # AUTOEVALUACIÓN:
 
 Siento que mi nota en esta unidad debería ser un 5.0, no solo por el hecho de que completé todas las actividades (desde las de investigación y comprensión de conceptos hasta las de diseño y creación) sino porque siento que aprendí bastante sobre el uso de los Dev Tunnels y cómo su sistema de funcionamiento puede permitir realizar tantas acciones de interacción entre dos o más dispositivos sin la necesidad de estar conectados manualmente, solo con la necesidad de abrir un canal via código y copiar un link en los dispositivos que se deseen conectar. Siento que aunque en unidades anteriores he tenido algunos altibajos, en esta unidad quedé muy satisfecho por mi trabajo de profundización y comprensión, lo cual me ayudó a disfrutarla y entender como funcionan muchas de las tecnologías interactivas que existen hoy en día.
+
+
+Actividad 01: Completada la apertura del canal de DevTunnels que permitió conectar los dispositivos posteriormente.
+
+ACTIVIDAD 02: Comprensión de los conceptos escenciales para entender el funcionamiento y para qué sirve cada uno. (
+
+ACTIVIDAD 03: Se comprendió por qué el método usado en esta unidad es más eficiente y menos tedioso que el que se usó en la unidad anterior, permitiendo conectar dispositivos sin tenerlos conectados a la misma red de wifi y sin usar la IP.
+
+ACTIVIDAD 04: Diagrama completado y grafica correctamente el proceso que realiza Dev Tunnels para enviar los datos desde el teléfono al pc.
+
+ACTIVIDAD 05 (APPLY): Actividad Final Funcional
+
+Nota Final Propuesta: 5.0
