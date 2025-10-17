@@ -181,4 +181,36 @@ RTA: Aquí está el video del funcionamiento del sistema y algunas capturas de l
 
 # ACTIVIDAD 03
 
+Enunciado
+
+Vamos a analizar el código server.js. Este script actúa como un repetidor simple pero esencial, recibiendo mensajes del cliente móvil y retransmitiéndolos al cliente de escritorio.
+
+
+**REPORTE DE BITÁCORA ACTIVIDAD 03:**
+
+A. ¿Cuál es la función principal de express.static(‘public’) en este servidor? ¿Cómo se compara con el uso de app.get(‘/ruta’, …) del servidor de la Unidad 6?
+
+RTA: La función principal de express.static('public') es permitir que el servidor entregue directamente los archivos que están dentro de la carpeta “public” sin tener que crear rutas manualmente. Es decir, si dentro de esa carpeta hay un archivo HTML, JS o CSS, el servidor lo puede enviar automáticamente al navegador cuando se le pide.
+En cambio, en la Unidad 6 usábamos app.get('/ruta', …) para definir de forma manual qué debía responder el servidor cuando alguien accedía a una dirección específica. Esa forma es más controlada, pero también más tediosa cuando tienes muchos archivos.
+En conclusión, express.static hace el trabajo más simple y eficiente, sobre todo cuando queremos servir una aplicación web completa (como la del desktop o el mobile) sin tener que escribir una ruta para cada archivo.
+
+B. Explica detalladamente el flujo de un mensaje táctil: ¿Qué evento lo envía desde el móvil? ¿Qué evento lo recibe el servidor? ¿Qué hace el servidor con él? ¿Qué evento lo envía el servidor al escritorio? ¿Por qué se usa socket.broadcast.emit en lugar de io.emit o socket.emit en este caso?
+
+RTA: Todo empieza en el cliente móvil, cuando el usuario toca o mueve el dedo sobre la pantalla. En ese momento se activa el evento touchMoved() en el código de p5.js, que toma las coordenadas del toque (mouseX, mouseY) y las envía al servidor usando socket.emit('message', data).
+El servidor, que está "escuchando" esos mensajes, los recibe con socket.on('message', (data) => {...}). En ese punto, el servidor no los guarda ni los procesa mucho: simplemente los retransmite a los demás clientes conectados, pero sin incluir al que los envió.
+Para eso se usa socket.broadcast.emit('message', data), porque socket.emit solo respondería al cliente que mandó el mensaje, y io.emit lo enviaría a todos, incluyendo al emisor. En este caso queremos que los datos del toque solo se reflejen en el computador (desktop) y no en el celular, por eso broadcast es la opción ideal.
+Finalmente, el cliente de escritorio recibe esos datos con su propio socket.on('message', …) y los usa para mover el círculo o actualizar la visualización en tiempo real.
+
+C. Si conectaras dos computadores de escritorio y un móvil a este servidor, y movieras el dedo en el móvil, ¿Quién recibiría el mensaje retransmitido por el servidor? ¿Por qué?
+
+RTA: En ese caso, ambos computadores de escritorio recibirían el mensaje, pero el celular no. Esto pasa porque el servidor usa socket.broadcast.emit, lo que significa que reenvía los datos del toque a todos los clientes conectados excepto al que los envió (el celular).
+Entonces, los dos escritorios verían moverse el círculo al mismo tiempo, ya que los dos están escuchando los mensajes del servidor. Es una forma de sincronizar varias visualizaciones sin duplicar la información en el cliente que origina los datos.
+
+D. ¿Qué información útil te proporcionan los mensajes console.log en el servidor durante la ejecución?
+
+RTA: Los mensajes console.log me resultaron muy útiles porque permiten ver en tiempo real lo que está pasando en el servidor. Muestran cuándo un cliente se conecta o se desconecta, y también los datos que llegan desde el celular cuando se hace un toque o movimiento. Esto ayuda mucho a entender el flujo completo de comunicación y a detectar si todo está funcionando bien.
+En general, me pareció interesante porque es como tener una “ventana” al interior del servidor: se puede ver cómo se comunican los dispositivos y confirmar que los mensajes viajan correctamente. Además, facilita muchísimo el proceso de depuración cuando algo no sale como se espera.
+
+
+# ACTIVIDAD 04
 
