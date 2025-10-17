@@ -227,3 +227,382 @@ RTA:
 <img width="1000" height="535" alt="Captura de pantalla 2025-10-17 022211" src="https://github.com/user-attachments/assets/14e5ec44-e6e6-43d2-b55b-c79dc9b6e5a3" />
 
 
+# ACTIVIDAD 05 (APPLY)
+
+1. Diseña una aplicación interactiva que use el touch del móvil para controlar una visuales de tema musical de tu elección. Las visuales correrán en una aplicación de escritorio (desktop). Recuerda que ambas aplicaciones las construirás usando p5.js y utilizando el servidor Node.js como puente.
+
+**IDEA DE DISEÑO:**
+
+- Parte automatizada (del desktop): Quiero que la visual de la aplicación sean unas partículas de color rojo que van a tener de fondo la canción de scorpions "Rock You Like A Hurricane" y que, cuando el volumen de la canción suba, las partículas aumenten su velocidad y que cuando el volumen de la canción baje, estas la disminuyan.
+
+- Parte Interactiva (del mobile): Por otro lado, quiero que la interacción que haya cuando se toca el táctil del teléfono sea que cuando se toque cierta parte de la pantalla, las coordenadas las partículas se acumulen donde se registraron las mismas y que cuando se deje de tocar la pantalla, que las partículas se dispersen para seguir con su comportamiento nuevamente.
+
+3. Implementa tu diseño. Puedes usar IA generativa para ayudarte a escribir el código, pero primero debes hacer el diseño de lo que quieres.
+   
+4. Incluye todos los códigos (servidor y clientes) en tu bitácora.
+
+Sketch Server:
+
+```js
+const express = require('express');
+const http = require('http');
+const socketIO = require('socket.io');
+
+const app = express();
+const server = http.createServer(app); 
+const io = socketIO(server); 
+const port = 3000;
+
+app.use(express.static('public'));
+
+io.on('connection', (socket) => {
+    console.log('New client connected');
+    socket.on('message', (message) => {
+        console.log('Received message =>', message);
+        socket.broadcast.emit('message', message);
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Client disconnected');
+    });
+});
+
+server.listen(port, () => {
+    console.log(`Server is listening on http://localhost:${port}`);
+});
+```
+
+
+Sketch Desktop:
+
+```js
+// sketch.js (Visualización Desktop)
+
+let socket;
+let song; 
+let amplitude; 
+let particles = [];
+const numParticles = 150; 
+const particleSize = 8;   
+const maxBaseSpeed = 0.5; 
+
+// --- NUEVAS VARIABLES DE CONTROL ---
+// Modos: 'AUDIO' (normal), 'CONCENTRATE', 'DISPERSE'
+let visualMode = 'AUDIO'; 
+let targetX = 0; // Posición X objetivo (normalizada)
+let targetY = 0; // Posición Y objetivo (normalizada)
+
+// Clase para definir una sola estrella/partícula
+class Star {
+    constructor() {
+        this.x = random(width);
+        this.y = random(height);
+        this.vx = random(-1, 1);
+        this.vy = random(-1, 1);
+    }
+
+    // Método para calcular el movimiento
+    update(ampLevel) {
+        if (visualMode === 'AUDIO') {
+            // Modo Normal: Movimiento basado en el volumen de la música
+            let speedMultiplier = map(ampLevel, 0, 1, 1, 15); 
+            this.x += this.vx * maxBaseSpeed * speedMultiplier;
+            this.y += this.vy * maxBaseSpeed * speedMultiplier;
+        } else if (visualMode === 'CONCENTRATE') {
+            // Modo Concentración: Se mueve hacia el punto objetivo (targetX, targetY)
+            let tx = targetX * width;
+            let ty = targetY * height;
+            
+            // Vector de movimiento hacia el objetivo
+            let dirX = tx - this.x;
+            let dirY = ty - this.y;
+            
+            // Mueve el 10% de la distancia restante en cada frame (hace un movimiento suave)
+            this.x += dirX * 0.1; 
+            this.y += dirY * 0.1;
+            
+        } else if (visualMode === 'DISPERSE') {
+            // Modo Dispersión: Dispara la partícula con un vector de velocidad aleatorio
+            // La velocidad se reasigna una sola vez al entrar en este modo
+            this.x += this.vx * 15; // Velocidad de dispersión alta
+            this.y += this.vy * 15;
+            
+            // Transición a AUDIO después de la dispersión (reestablece la velocidad normal)
+            if (this.x < 0 || this.x > width || this.y < 0 || this.y > height) {
+                // Si sale de la pantalla, se reubica aleatoriamente y vuelve a modo AUDIO
+                this.x = random(width);
+                this.y = random(height);
+                visualMode = 'AUDIO'; // Vuelve al modo normal si una partícula sale
+            }
+        }
+
+        // Si la estrella sale de la pantalla en modo AUDIO, la reposicionamos
+        if (visualMode === 'AUDIO') {
+            if (this.x < 0) this.x = width;
+            if (this.x > width) this.x = 0;
+            if (this.y < 0) this.y = height;
+            if (this.y > height) this.y = 0;
+        }
+    }
+
+    // Método para dibujar la estrella
+    display(ampLevel) {
+        noStroke();
+        
+        let redValue = map(ampLevel, 0, 1, 150, 255); 
+        let alphaValue = map(ampLevel, 0, 1, 150, 255);
+        
+        fill(redValue, 0, 0, alphaValue); 
+        
+        ellipse(this.x, this.y, particleSize, particleSize);
+    }
+}
+
+function preload() {
+    song = loadSound("/assets/rock_you_like_a_hurricane.mp3");
+}
+
+function setup() {
+    createCanvas(windowWidth, windowHeight);
+    background(0);
+    
+    amplitude = new p5.Amplitude(); 
+
+    // Inicializar partículas/estrellas
+    for (let i = 0; i < numParticles; i++) {
+        particles.push(new Star());
+    }
+
+    // Configuración de Socket.io
+    socket = io(); 
+    socket.on('connect', () => { console.log('Connected to server'); });
+    
+    // --- MANEJO DE MENSAJES DEL CELULAR ---
+    socket.on('message', (data) => {
+        console.log(`Received message:`, data);
+        if (data.type === 'start') {
+            // Tocar: Cambia a modo CONCENTRATE y guarda la posición
+            visualMode = 'CONCENTRATE';
+            targetX = data.x; // Coordenadas normalizadas 0-1
+            targetY = data.y;
+        } else if (data.type === 'end') {
+            // Soltar: Cambia a modo DISPERSE y reasigna vectores de velocidad
+            visualMode = 'DISPERSE';
+            particles.forEach(p => {
+                // Le da una velocidad aleatoria muy alta para la dispersión
+                p.vx = random(-1, 1); 
+                p.vy = random(-1, 1);
+            });
+        }
+    });    
+    
+    socket.on('disconnect', () => { console.log('Disconnected from server'); });
+    socket.on('connect_error', (error) => { console.error('Socket.IO error:', error); });
+}
+
+function draw() {
+    background(0, 30); 
+
+    let level = amplitude.getLevel();
+
+    for (let i = 0; i < particles.length; i++) {
+        particles[i].update(level);     
+        particles[i].display(level);    
+    }
+}
+
+function mousePressed() {
+    // Lógica para iniciar el audio (requerida por navegadores)
+    let startMessage = document.getElementById('start-message');
+    if (startMessage) {
+        startMessage.style.display = 'none';
+    }
+    
+    if (song && !song.isPlaying()) {
+        song.loop(); 
+        amplitude.setInput(song); 
+    }
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+}
+```
+
+
+Sketch Mobile:
+
+```js
+// sketch.js (Celular)
+
+let socket;
+// Ya no necesitamos lastTouchX/Y ni threshold si solo enviamos Start/End
+const port = 3000;
+
+function setup() {
+    // Canvas que ocupa toda la pantalla del celular
+    createCanvas(windowWidth, windowHeight); 
+    background(0); // Fondo negro para el controlador
+    socket = io(); 
+
+    socket.on('connect', () => {
+        console.log('Connected to server');
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Disconnected from server');
+    });
+
+    socket.on('connect_error', (error) => {
+        console.error('Socket.IO error:', error);
+    });
+}
+
+function draw() {
+    background(0);
+    fill(255, 255, 255);
+    textAlign(CENTER, CENTER);
+    textSize(24);
+    text('Toca para concentrar estrellas', width / 2, height / 2);
+
+    // Feedback visual al tocar
+    if (touches.length > 0) {
+        fill(255, 0, 0, 150);
+        noStroke();
+        ellipse(touches[0].x, touches[0].y, 60, 60);
+    }
+}
+
+function touchStarted() {
+    if (socket && socket.connected && touches.length > 0) {
+        // Enviar coordenadas normalizadas (0 a 1) y tipo 'start'
+        let touchData = {
+            type: 'start',
+            x: touches[0].x / width, // Normalizado
+            y: touches[0].y / height // Normalizado
+        };
+        socket.emit('message', touchData);
+        console.log('Touch Start Sent:', touchData);
+    }
+    return false; // Previene el desplazamiento de la página
+}
+
+function touchEnded() {
+    if (socket && socket.connected) {
+        // Enviar tipo 'end' para dispersar las partículas
+        let touchData = {
+            type: 'end'
+        };
+        socket.emit('message', touchData);
+        console.log('Touch End Sent');
+    }
+    return false; // Previene el desplazamiento de la página
+}
+
+function windowResized() {
+    resizeCanvas(windowWidth, windowHeight);
+}
+```
+
+
+Index Desktop:
+
+```js
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visuales de Amsterdam (Desktop)</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.11.0/lib/p5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.11.0/lib/addons/p5.sound.min.js"></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="sketch.js"></script>
+
+    <style>
+        /* Estilos básicos para eliminar márgenes del navegador */
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #000; /* Fondo oscuro, ideal para visuales */
+            overflow: hidden; /* Evita barras de desplazamiento */
+            color: white; /* Para el mensaje de clic */
+            font-family: Arial, sans-serif;
+            flex-direction: column;
+        }
+
+        /* Estilo para el mensaje de inicio */
+        #start-message {
+            position: absolute; /* Para que quede encima del canvas si ya se ha creado */
+            z-index: 100;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            /* Esto asegura que el mensaje esté visible y centrado */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+<body>
+    <div id="start-message">
+        ¡Haz clic o toca en cualquier lugar para empezar la música y la visual! 🎶
+    </div>
+
+    <script>
+        // **Código para quitar el texto al hacer clic**
+        document.getElementById('start-message').addEventListener('click', function() {
+            // Establece el estilo 'display' en 'none' para ocultar completamente el elemento
+            this.style.display = 'none';
+        });
+
+        // Asegurarse de que al hacer clic en el canvas también funcione si el usuario no hace clic en el div exacto
+        function mousePressed() {
+            let startMessage = document.getElementById('start-message');
+            if (startMessage) {
+                // Si el mensaje sigue visible y se hace clic en el canvas, lo oculta
+                startMessage.style.display = 'none';
+            }
+            
+            // Lógica original de p5.js para iniciar la canción
+            if (song && !song.isPlaying()) {
+                song.loop();
+                console.log("Canción iniciada por interacción del usuario.");
+            }
+        }
+    </script>
+</body>
+</html>
+```
+
+
+Index Mobile
+
+```js
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.11.0/lib/p5.min.js"></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="sketch.js"></script>
+    <title>Mobile p5.js Application</title>
+</head>
+<body></body>
+</html>
+```
+
+[Video Demostrando La App](https://youtu.be/7jlIcNDjCjQ)
+
+
+# AUTOEVALUACIÓN:
+
+Siento que mi nota en esta unidad debería ser un 5.0, no solo por el hecho de que completé todas las actividades (desde las de investigación y comprensión de conceptos hasta las de diseño y creación) sino porque siento que aprendí bastante sobre el uso de los Dev Tunnels y cómo su sistema de funcionamiento puede permitir realizar tantas acciones de interacción entre dos o más dispositivos sin la necesidad de estar conectados manualmente, solo con la necesidad de abrir un canal via código y copiar un link en los dispositivos que se deseen conectar. Siento que aunque en unidades anteriores he tenido algunos altibajos, en esta unidad quedé muy satisfecho por mi trabajo de profundización y comprensión, lo cual me ayudó a disfrutarla y entender como funcionan muchas de las tecnologías interactivas que existen hoy en día.
