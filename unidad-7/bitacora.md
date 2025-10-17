@@ -88,7 +88,6 @@ E. Describe el comportamiento observado: ¿Funcionó la interacción? ¿Hubo alg
 
 RTA: Tras realizar el vínculo de DevTunnels de manera adecuada, se logró establecer la conexión y en este caso, se pudo interactuar con el círculo rojo que aparecía en pantalla en el pc desde el tacto del teléfono, sin embargo, pude identificar que si tocaba ligeramente la pantalla en ubicaciones al asar, el círculo no se desplazaría directamente, sino que tocaba mantener oprimido el dedo sobre la pantalla durante algunos segundos. Además, pude notar que aunque el círculo se desplazaba cuando movía el dedo por la pantalla, este tenía un pequeño retraso de algunos milisegundos, no obstante, la interacción funcionó de manera adecuada.
 
-[Demostración del Uso de la Aplicación](https://youtu.be/d-XlG-U2DxQ)
 
 **SEEK: INVESTIGACIÓN**
 
@@ -130,5 +129,56 @@ RTA: Tras realizar el vínculo de DevTunnels de manera adecuada, se logró estab
 
 
 # ACTIVIDAD 02
+
+
+1. **El problema de la conexión directa:**
+
+- Cuando ejecutas npm start, el servidor escucha en localhost:3000. localhost (o 127.0.0.1) es una dirección especial que siempre se refiere a tu propia máquina.
+- Si intentaras acceder a http://localhost:3000 desde tu celular, este buscaría un servidor en el propio celular, no en tu computador.
+- Podrías usar la IP local de tu computador (ej. 192.168.1.X), pero esto solo funciona si ambos dispositivos están en la misma red Wi-Fi y no hay firewalls bloqueando. No funcionaría si tu celular usa datos móviles o está en otra red.
+- Necesitamos una dirección pública y accesible desde cualquier lugar.
+
+
+2. **La solución: VS Code Dev Tunnels (Port Forwarding):**
+
+- Dev Tunnels actúa como un intermediario seguro. Crea un túnel desde una URL pública en Internet (la que obtuviste, como https://TU-TENDRAS-UNA-DIFERNTE.use2.devtunnels.ms/) hasta el puerto 3000 de tu localhost.
+- Cuando tu celular (o cualquier cliente en Internet) se conecta a la URL pública de Dev Tunnels, el servicio de Dev Tunnels reenvía esa conexión de forma segura a través del túnel hasta tu servidor Node.js local.
+- Del mismo modo, las respuestas de tu servidor local viajan de vuelta por el túnel hasta el servicio Dev Tunnels, que las entrega al cliente (celular/escritorio).
+- Analogía: Es como tener un número de teléfono público (la URL de Dev Tunnels) que redirige las llamadas a tu teléfono privado en casa (localhost:3000), sin exponer directamente tu número privado.
+
+
+3. **Capturando la entrada: eventos táctiles en p5.js (mobile/sketch.js):**
+
+- p5.js ofrece funciones específicas que se ejecutan automáticamente cuando ocurren eventos táctiles en un dispositivo móvil (o simulación en escritorio).
+- touchMoved(): es la función clave aquí. Se llama continuamente mientras el usuario mantiene un dedo presionado y lo mueve sobre el canvas. Dentro de esta función, mouseX y mouseY contienen las coordenadas actuales del toque.
+- Optimización (threshold): el código no envía un mensaje en cada pequeño movimiento detectado por touchMoved(). Comprueba si el movimiento desde la última vez que se envió (lastTouchX, lastTouchY) supera un umbral (threshold). Esto evita inundar la red con mensajes si el dedo tiembla o se mueve mínimamente, enviando solo cambios significativos.
+- Otras funciones útiles (no usadas en este caso base, pero relevantes):
+  - touchStarted(): se llama una vez cuando el usuario toca la pantalla por primera vez.
+  - touchEnded(): se llama una vez cuando el usuario levanta el dedo de la pantalla.
+
+**REPORTE DE BITÁCORA EN LA ACTIVIDAD 02:**
+
+A. Explica con tus propias palabras: ¿Por qué es necesario Dev Tunnels en este escenario y cómo funciona conceptualmente?
+
+RTA: Dev Tunnels es necesario ya que este es el que permite que el computador se pueda conectar a una red pública vía internet a la cuál pueden acceder dispositivos externos sin necesidad de estar conectados a la misma red, de manera que cuando desde el dispositivo externo, en este caso el teléfono, haya una interacción de tacto (un toque o desliz con el dedo) las coordenadas del mismo sean reportadas al Node.js del pc y esto haga que se represente gráficamente en la pantalla del pc. Básicamente DevTunnels funciona conceptualmente como un "puente" o "tunel" que da paso a la conexión entre el pc (dispositivo local) y el teléfono (dispositivo externo).
+
+B. Describe la función de touchMoved() y por qué se usa la variable threshold en el cliente móvil.
+
+RTA: La función touchMoved() es la que permite registrar las coordenadas en X y Y del toque realizado sobre la pantalla táctil del teléfono, lo que permite enviar después esos datos al pc y así registrar el movimiento del mismo en la versión visual de la aplicación. En este caso, la variable treshold ayuda a que cuando haya una interacción muy leve cuando se realice el toque, es decir que medio se roce la pantalla o se toque levemente, no se registre el movimiento de manera inmediata para así, tener menos "descontrol" sobre el envío de corrdenadas que se va a realizar hacia el pc.
+
+C. Compara brevemente Dev Tunnels con simplemente usar la IP local. ¿Cuáles son las ventajas y desventajas de cada uno?
+
+RTA: Usar la IP local permite conectar dispositivos que están dentro de la misma red Wi-Fi, sin necesidad de Internet, lo que suele hacer la comunicación un poco más rápida y directa. Sin embargo, esta opción solo funciona si el celular y el computador están en la misma red y no hay bloqueos del router o firewalls. En cambio, Dev Tunnels no necesita que ambos dispositivos compartan la misma red: crea un túnel seguro a través de una URL pública que cualquiera con Internet puede usar para conectarse al servidor local. Su principal ventaja es la accesibilidad y la seguridad, aunque depende de la conexión a Internet y puede generar un poco más de latencia al enviar los datos.
+
+D. Coloca en tu bitácora capturas de pantalla del sistema completo funcionando. Esto lo puedes hacer abriendo tanto el mobile como el desktop en tu computador y tomando una captura de pantalla de todos los involucrados (celular, computador y terminal).
+
+RTA: Aquí está el video del funcionamiento del sistema y algunas capturas de la terminal:
+
+[Demostración del Uso de la Aplicación](https://youtu.be/d-XlG-U2DxQ)
+
+<img width="718" height="405" alt="Captura de pantalla 2025-10-17 000729" src="https://github.com/user-attachments/assets/7f6709ca-3d2e-45e2-909f-ad364de6a0e4" />
+
+
+# ACTIVIDAD 03
 
 
