@@ -214,3 +214,16 @@ En general, me pareció interesante porque es como tener una “ventana” al in
 
 # ACTIVIDAD 04
 
+Enunciado:
+
+Ahora analizaremos el código que corre en los navegadores: el cliente móvil que captura el toque (mobile/sketch.js) y el cliente de escritorio que recibe la información y dibuja (desktop/sketch.js). Veremos cómo usan Socket.IO para comunicarse con el servidor.
+
+**REPORTE DE BITÁCORA ACTIVIDAD 04:**
+
+Realiza un diagrama donde muestres el flujo completo de datos y eventos entre los tres componentes: móvil, servidor y escritorio. Puedes ilustrar con un ejemplo de coordenadas táctiles (x, y) y cómo viajan a través del sistema.
+
+RTA:
+
+<img width="1000" height="535" alt="Captura de pantalla 2025-10-17 022211" src="https://github.com/user-attachments/assets/14e5ec44-e6e6-43d2-b55b-c79dc9b6e5a3" />
+
+
