@@ -11,6 +11,9 @@ En esta fase de la unidad vas a seleccionar un tema musical (o un concepto visua
 
 RTA: En este caso, me quiero basar en mi aplicación de la unidad anterior, la cual tenía una visual de partículas que aumentaban su velocidad de movimiento cuando el volumen del tema de fondo aumentaba. En cuanto a la función del táctil del teléfono, cuando se realizaba algún toque sobre la pantalla de este, las partículas se acumulaban en las coordenadas registradas del mismo y cuando se dejaba de tocar la pantalla, estas salían disparadas de manera dispersa por la pantalla.
 
+[Video Demostrando La App](https://youtu.be/7jlIcNDjCjQ)
+
+Ahora, lo que quiero hacer con las funciones del micro:bit es que, cuando este se incline para la izquierda o para la derecha, que el movimiento de las partículas se vea guiado hacia la izquierda o la derecha respectivamente.
 
 3. Define el concepto de las visuales que quieres crear.
 
@@ -27,3 +30,4 @@ RTA:
 6. Haz un diagrama que explique cómo se comunicarán los diferentes componentes del sistema.
 
 RTA:
+
