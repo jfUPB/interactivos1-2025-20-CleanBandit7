@@ -22,6 +22,7 @@ RTA: En este caso, me quiero basar en mi aplicación de la unidad anterior, la c
 3. Define el concepto de las visuales que quieres crear.
 
 RTA: El concepto de la aplicación no es muy complejo, básicamente la idea es jugar un poco con la temática del cyberpunk, en este caso su paleta de colores y a esto, sumarle ciertos comandos: la automatización de la velocidad de movimiento de las partículas con respecto al volumen del tema de fondo que va a sonar a lo largo de la ejecución de la app ("Rock You Like A Hurricane" de Scorpions), la acumulación de partículas en las coordenadas registradas por el táctil del teléfono, la acumulación de paartículas en el lado de la pantalla al que se incline el micro:bit y el cambio de color de las partículas.
+Algo que, aunque parezca no tener mucha relevancia con respecto al producto final pero que para mí cuenta con respecto al diseño de la aplicación es que me basé en la saga de películas tron, en la cual los personajes cuando conducían su icónicas motocicletas dejaban a su paso una estela del color que tenían, lo que se puede ver en el movimiento de las partículas, mismas que dejarán su respectiva estela del color que tienen.
 
 4. Explica cómo el móvil y el micro:bit controlarán las visuales.
 
@@ -57,4 +58,5 @@ RTA: Diagrama de flujo de la aplicación
 **AUTOEVALUACIÓN:**
 
 Mi nota en esta unidad debería ser 3, ya que realicé completa la actividad 1 de la unidad (toda la parte de diseño de la aplicación) mostrando imágenes de referencia para el producto final, un diagrama de flujo bien explicado, una descripción clara y concisa con cada una de las funciones que cumpliría cada comando del móvil, el micro:bit y el desktop y también un plan bien organizado de la aplicación. Aunque no haya logrado completar el apply, siento que básicamente el modelo base para realizarla quedó listo, por lo cual se cumplió con los criterios para sacar 3 en la unidad, es decir, completar la actividad 1.
+
 
